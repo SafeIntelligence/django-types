@@ -11,7 +11,7 @@ from django.db.models.base import Model
 from django.db.models.manager import EmptyManager, ManyToManyRelatedManager
 from typing_extensions import Never, Self
 
-_AnyUser: TypeAlias = AbstractUser | AnonymousUser
+_AnyUser: TypeAlias = AbstractBaseUser | AnonymousUser
 
 _T = TypeVar("_T", bound=Model)
 

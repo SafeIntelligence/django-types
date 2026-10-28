@@ -1,4 +1,4 @@
-from collections.abc import Iterable, Mapping
+from collections.abc import Awaitable, Callable, Iterable, Mapping
 from re import Pattern
 from typing import Any, BinaryIO, TypeAlias, TypeVar, overload
 
@@ -7,11 +7,7 @@ from django.contrib.sessions.backends.base import SessionBase
 from django.contrib.sites.models import Site
 from django.core.files import uploadedfile, uploadhandler
 from django.urls import ResolverMatch
-from django.utils.datastructures import (
-    CaseInsensitiveMapping,
-    ImmutableList,
-    MultiValueDict,
-)
+from django.utils.datastructures import CaseInsensitiveMapping, ImmutableList, MultiValueDict
 from typing_extensions import Self
 
 RAISE_ERROR: object = ...
@@ -101,6 +97,7 @@ class HttpRequest:
     current_app: str
     # django.contrib.auth.middleware.AuthenticationMiddleware:
     user: _AnyUser
+    auser: Callable[[], Awaitable[_AnyUser]]
     # django.contrib.sites.middleware.CurrentSiteMiddleware
     site: Site
     # django.contrib.sessions.middleware.SessionMiddleware
