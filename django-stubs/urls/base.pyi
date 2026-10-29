@@ -1,4 +1,5 @@
 from collections.abc import Callable, Mapping, Sequence
+from types import ModuleType
 from typing import Any, TypeAlias
 
 from django.http.request import QueryDict
@@ -16,7 +17,7 @@ _QueryType: TypeAlias = (
     | Sequence[tuple[str | bytes, Sequence[object]]]
 )
 
-def resolve(path: str, urlconf: str | None = ...) -> ResolverMatch: ...
+def resolve(path: str, urlconf: str | ModuleType | None = ...) -> ResolverMatch: ...
 def reverse(
     viewname: Callable[..., Any] | str | None,
     urlconf: str | None = ...,

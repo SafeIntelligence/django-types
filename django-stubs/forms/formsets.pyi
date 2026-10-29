@@ -21,6 +21,7 @@ _BaseFormT = TypeVar("_BaseFormT", bound=BaseForm)
 class ManagementForm(Form): ...
 
 class BaseFormSet(Generic[_BaseFormT], RenderableFormMixin):
+    form: type[_BaseFormT]
     deletion_widget: type[CheckboxInput]
     ordering_widget: type[NumberInput]
     default_error_messages: dict[str, str]
@@ -96,7 +97,6 @@ class BaseFormSet(Generic[_BaseFormT], RenderableFormMixin):
 
 # Dynamic class produced by formset_factory
 class _FormSet(BaseFormSet[_BaseFormT]):
-    form: type[_BaseFormT]
     extra: int
     can_order: bool
     can_delete: bool

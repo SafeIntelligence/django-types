@@ -2,8 +2,9 @@ from .base import run_pyright
 
 
 def test_supported_runtime_contracts() -> None:
-    assert run_pyright(
-        '''
+    assert (
+        run_pyright(
+            """
 from datetime import timedelta
 from typing_extensions import assert_type
 from django.contrib.auth.base_user import AbstractBaseUser
@@ -46,13 +47,15 @@ async def supported(
     assert_type(statements, list[str])
     operations.execute_sql_flush(statements)
     assert_type(operations.sequence_reset_sql(style, [Target]), list[str])
-'''
-    ) == []
+"""
+        )
+        == []
+    )
 
 
 def test_relation_rejects_through_model_as_target() -> None:
     results = run_pyright(
-        '''
+        """
 from django.db.models import Model
 from django.db.models.manager import ManyToManyRelatedManager
 
@@ -65,7 +68,7 @@ class Through(Model):
 async def invalid(manager: ManyToManyRelatedManager[Target, Through], through: Through) -> None:
     manager.add(through)
     await manager.aset([through])
-'''
+"""
     )
     assert len(results) == 2
     assert all(result.type == "error" for result in results)
@@ -93,6 +96,42 @@ async def check(user: AbstractUser, policy: Policy) -> None:
     assert_type(user.has_perms(["project.view"], policy), bool)
     assert_type(await user.ahas_perm("project.view", policy), bool)
     assert_type(await user.ahas_perms(["project.view"], policy), bool)
+"""
+        )
+        == []
+    )
+
+
+def test_inline_and_staticfiles_runtime_contracts() -> None:
+    assert (
+        run_pyright(
+            """
+from types import ModuleType
+from typing_extensions import assert_type
+from asgiref.typing import ASGI3Application
+from django.contrib.admin import AdminSite, TabularInline
+from django.contrib.staticfiles.handlers import ASGIStaticFilesHandler, StaticFilesHandler
+from django.core.handlers.wsgi import WSGIHandler
+from django.db.models import Model
+from django.forms import BaseFormSet, Form
+from django.http import HttpRequest
+from django.http.response import HttpResponseBase
+from django.urls import resolve
+
+class Parent(Model): pass
+class Child(Model): pass
+class ChildInline(TabularInline[Child]):
+    model = Child
+
+async def check(request: HttpRequest, parent: Parent, app: ASGI3Application,
+                wsgi: WSGIHandler, urls: ModuleType, forms: BaseFormSet[Form]) -> None:
+    inline = ChildInline(Parent, AdminSite())
+    formset = inline.get_formset(request, obj=parent)
+    assert "name" not in formset.form.base_fields
+    assert_type(forms.form, type[Form])
+    resolve('/example/', urlconf=urls)
+    assert_type(await ASGIStaticFilesHandler(app).get_response_async(request), HttpResponseBase)
+    assert_type(StaticFilesHandler(wsgi).serve(request), HttpResponseBase)
 """
         )
         == []

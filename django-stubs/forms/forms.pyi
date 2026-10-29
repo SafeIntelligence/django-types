@@ -14,6 +14,8 @@ from django.utils.safestring import SafeText
 class DeclarativeFieldsMetaclass(MediaDefiningClass): ...
 
 class BaseForm(RenderableFormMixin):
+    base_fields: ClassVar[dict[str, Field]]
+    declared_fields: ClassVar[dict[str, Field]]
     default_renderer: type[BaseRenderer]
     field_order: list[str] | None
     use_required_attribute: bool
@@ -74,6 +76,4 @@ class BaseForm(RenderableFormMixin):
         errors_on_separate_row: bool,
     ) -> SafeText: ...
 
-class Form(BaseForm, metaclass=DeclarativeFieldsMetaclass):
-    base_fields: ClassVar[dict[str, Field]]
-    declared_fields: ClassVar[dict[str, Field]]
+class Form(BaseForm, metaclass=DeclarativeFieldsMetaclass): ...
