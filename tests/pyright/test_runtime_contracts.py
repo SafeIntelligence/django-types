@@ -69,3 +69,31 @@ async def invalid(manager: ManyToManyRelatedManager[Target, Through], through: T
     )
     assert len(results) == 2
     assert all(result.type == "error" for result in results)
+
+
+def test_permissions_accept_backend_policy_objects() -> None:
+    assert (
+        run_pyright(
+            """
+from dataclasses import dataclass
+from typing import Protocol
+from typing_extensions import assert_type
+from django.contrib.auth.models import AbstractUser
+
+@dataclass
+class Policy:
+    project_id: int
+
+class PermissionActor(Protocol):
+    def has_perm(self, perm: str, obj: object | None = None) -> bool: ...
+
+async def check(user: AbstractUser, policy: Policy) -> None:
+    actor: PermissionActor = user
+    assert_type(actor.has_perm("project.view", policy), bool)
+    assert_type(user.has_perms(["project.view"], policy), bool)
+    assert_type(await user.ahas_perm("project.view", policy), bool)
+    assert_type(await user.ahas_perms(["project.view"], policy), bool)
+"""
+        )
+        == []
+    )
